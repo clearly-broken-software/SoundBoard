@@ -1,0 +1,6 @@
+[submodule "dpf"]
+	path = dpf
+	url = https://github.com/DISTRHO/DPF.git
+[submodule "sfizz"]
+	path = sfizz
+	url = https://github.com/sfztools/sfizz
