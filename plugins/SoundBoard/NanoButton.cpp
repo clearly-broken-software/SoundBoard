@@ -30,7 +30,7 @@ Button::Button(Widget *parent, Callback *cb)
     loadSharedResources();
     fNanoFont = findFont(NANOVG_DEJAVU_SANS_TTF);
     labelColor = Color(255, 255, 255);
-    backgroundColor = Color(32,32,32);
+    backgroundColor = Color(32, 32, 32);
     Label = "button";
 }
 
@@ -44,7 +44,7 @@ void Button::onNanoDisplay()
     beginPath();
     fillColor(backgroundColor);
     strokeColor(borderColor);
-    rect(margin, margin, w - 2 * margin, h-2*margin);
+    rect(margin, margin, w - 2 * margin, h - 2 * margin);
     fill();
     stroke();
     closePath();
@@ -58,7 +58,7 @@ void Button::onNanoDisplay()
     textBounds(0, 0, Label.c_str(), NULL, bounds);
     // float tw = bounds.getWidth();
     // float th = bounds.getHeight();
-    float tx = w / 2.0f ;
+    float tx = w / 2.0f;
     float ty = h / 2.0f;
     textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
 
@@ -86,9 +86,10 @@ bool Button::onMouse(const MouseEvent &ev)
 {
     if (ev.press & contains(ev.pos))
     {
+        const int button= ev.button;
         buttonActive = true;
-        setLabelColor(labelColor);     
-        fCallback->buttonClicked(this, true);
+        setLabelColor(labelColor);
+        fCallback->buttonClicked(this, button);
         return true;
     }
     else if (buttonActive)

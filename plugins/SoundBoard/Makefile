@@ -15,9 +15,9 @@ NAME = SoundBoard
 FILES_DSP = \
 	SoundBoardPlugin.cpp
 
-# FILES_UI = \
-# 	SoundBoardUI.cpp \
-# 	NanoButton.cpp
+FILES_UI = \
+	SoundBoardUI.cpp \
+	NanoButton.cpp
 
 # --------------------------------------------------------------
 # Do some magic
@@ -29,9 +29,10 @@ include ../../sfizz/dpf.mk
 # Extra flags
 BUILD_C_FLAGS += $(SFIZZ_C_FLAGS)
 BUILD_CXX_FLAGS += $(SFIZZ_CXX_FLAGS)
-LINK_FLAGS += $(SFIZZ_LINK_FLAGS) $(shell $(PKG_CONFIG) --libs sndfile )
-BASE_FLAGS += -I.  # -I./widgets -I./external/src
+LINK_FLAGS += $(SFIZZ_LINK_FLAGS) 
+BASE_FLAGS += -I. -I../../sfizz/external/filesystem/include/ghc
 
+	
 # --------------------------------------------------------------
 # Enable all possible plugin types
 

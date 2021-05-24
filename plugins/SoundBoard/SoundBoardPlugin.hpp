@@ -21,13 +21,11 @@
 
 #include "DistrhoPlugin.hpp"
 #include "sfizz.hpp"
-#include <iostream>
-#include <sndfile.hh>
 #include <string>
 #include <iostream>
 #include <sstream>
-#include <unordered_map>
 #include <mutex>
+
 START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------
@@ -77,10 +75,8 @@ protected:
     // Init
 
     void initParameter(uint32_t index, Parameter &parameter) override;
+    void initState(uint32_t index, String &stateKey, String &defaultStateValue) override;
     void setState(const char *key, const char *value) override;
-    String getState(const char *key) const override;
-    void initState(unsigned int, String &, String &) override;
-
     // -------------------------------------------------------------------
     // Internal data
 
@@ -88,24 +84,16 @@ protected:
     void setParameterValue(uint32_t index, float value) override;
     // -------------------------------------------------------------------
     // Process
-
-    //void activate() override;
     void run(const float **, float **outputs, uint32_t frames, const MidiEvent *midiEvents, uint32_t midiEventCount) override;
-
     // -------------------------------------------------------------------
 
 private:
     void initSFZ();
     void makeSFZ();
-    //   int loadSample(const char *fp);
-
-    double sampleRate;
-    std::string sample_paths[9];
-    std::string keys[9];
     sfz::Sfizz synth;
     std::mutex synthMutex;
-
-//    friend class SoundBoardUI;
+    std::string sample_paths[9];
+    std::string keys[9];
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundBoardPlugin)
 };

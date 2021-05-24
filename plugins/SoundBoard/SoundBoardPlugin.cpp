@@ -1,21 +1,3 @@
-/* 
-    SoundBoard
-    Copyright (C) 2021  Rob van den Berg
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 #include "DistrhoPlugin.hpp"
 #include "SoundBoardPlugin.hpp"
 
@@ -23,19 +5,48 @@ START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------------
 
-SoundBoardPlugin::SoundBoardPlugin() : Plugin(kParameterCount, 0, 2)
+SoundBoardPlugin::SoundBoardPlugin() : Plugin(kParameterCount, 0, 1)
 {
-    sampleRate = getSampleRate();
-    synth.setSampleRate(sampleRate);
+    synth.setSampleRate(getSampleRate());
     synth.setNumVoices(9);
-    //   synth.loadSfzFile("/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/SoundBoard.sfz");
     initSFZ();
     makeSFZ();
 }
 
-// --  PARAMETERS  -------------------------------------------------------------
+void SoundBoardPlugin::initState(uint32_t index, String &stateKey, String &defaultStateValue)
+{
+    switch (index)
+    {
+    case 0:
+        stateKey = "filename";
+        defaultStateValue = "";
+        break;
 
-// Init
+    default:
+        printf("initState %i\n", index);
+        break;
+    }
+}
+
+void SoundBoardPlugin::setState(const char *key, const char *value)
+{
+    if (std::strcmp(key, "filepath") == 0)
+    {
+        char dst[strlen(value) + 1];
+        std::strcpy(dst, value);
+        char *ptr = strtok(dst, ",");
+        int currentButton = atoi(ptr);
+        while (ptr != nullptr)
+        {
+            printf(" %s\n", ptr);
+            ptr = strtok(nullptr, ",");
+            if (ptr != nullptr)
+                sample_paths[currentButton] = ptr;
+        }
+        makeSFZ();
+    }
+}
+
 void SoundBoardPlugin::initParameter(uint32_t index, Parameter &parameter)
 {
 }
@@ -49,63 +60,21 @@ void SoundBoardPlugin::setParameterValue(uint32_t index, float value)
 {
 }
 
-void SoundBoardPlugin::setState(const char *key, const char *value)
-{
-    if (strcmp(key, "ui_sample_loaded") == 0)
-    {
-        //      sig_sampleLoaded = false;
-    }
-    if (strcmp(key, "filepath") == 0)
-    {
-        //     path = std::string(value);
-        //      loadSample(value);
-        makeSFZ();
-    }
-}
-
-String SoundBoardPlugin::getState(const char *key) const
-{
-    String retString = String("fix me");
-#ifdef DEBUG
-    printf("getState(%s)\n", key);
-#endif
-    if (strcmp(key, "filepath") == 0)
-    {
-        //       retString = path.c_str();
-    }
-    if (strcmp(key, "ui_sample_loaded") == 0)
-    {
-        retString = "ui_sample_loaded yes/no";
-    }
-    return retString;
-};
-
-void SoundBoardPlugin::initState(unsigned int index, String &stateKey, String &defaultStateValue)
-{
-    switch (index)
-    {
-    case 0:
-        stateKey = "filepath";
-        defaultStateValue = "empty";
-        break;
-    case 1:
-        stateKey = "ui_sample_loaded";
-        defaultStateValue = "false";
-        break;
-    default:
-#ifdef DEBUG
-        printf("initState %i\n", index);
-#endif
-        break;
-    }
-}
-
 void SoundBoardPlugin::initSFZ()
 {
     for (int i = 0; i < 9; i++)
     {
         sample_paths[i] = "*sine";
     }
+    sample_paths[0] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample1.wav";
+    sample_paths[1] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample2.wav";
+    sample_paths[2] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample3.wav";
+    sample_paths[3] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample4.wav";
+    sample_paths[4] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample5.wav";
+    sample_paths[5] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample6.wav";
+    sample_paths[6] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample7.wav";
+    sample_paths[7] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample8.wav";
+    sample_paths[8] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample9.wav";
 
     keys[0] = "c4";
     keys[1] = "d4";
@@ -116,39 +85,23 @@ void SoundBoardPlugin::initSFZ()
     keys[6] = "b4";
     keys[7] = "c5";
     keys[8] = "d5";
-    keys[9] = "e5";
 }
 
 void SoundBoardPlugin::makeSFZ()
 {
     std::stringstream buffer;
-    // for (int i = 0; i < 9; i++)
-    // {
-    //     buffer << "<region>\n";
-    //     buffer << "sample=" << sample_paths[i] << "\n";
-    //     buffer << "key=" << keys[i] << "\n";
-    //     buffer << "loop_mode=one_shot\n";
-    //     buffer << "amp_veltrack=0\n";
-    // }
-
-    buffer << "<region>\n";
-    buffer << "sample=" << sample_paths[0] << "\n";
-    buffer << "key=" << keys[0] << "\n";
-    buffer << "loop_mode=one_shot\n";
-    buffer << "amp_veltrack=0\n";
-
-    // replace decimal comma wih decimal point
-    //    std::string tmpSFZ = buffer.str();
-    //    std::replace(tmpSFZ.begin(), tmpSFZ.end(), ',', '.'); // TODO don't replace in file path
-
-#ifdef DEBUG
-    std::cout << "----------------- SFZ FILE ------------------\n";
-    std::cout << buffer.str() << std::endl;
-    std::cout << "----------------- SFZ FILE ------------------\n";
-#endif
-    //  std::lock_guard<std::mutex> lock(synthMutex);
-    //synth.loadSfzString("", buffer.str());
-    std::string sfz = "<region>\nsample=*sine\n";
+    for (int i = 0; i < 9; i++)
+    {
+        buffer << "<region>\n";
+        buffer << "sample=" << sample_paths[i] << "\n";
+        buffer << "key=" << keys[i] << "\n";
+        buffer << "loop_mode=one_shot\n";
+        buffer << "amp_veltrack=0\n";
+    }
+    //    std::string sfz = "<region>\nsample=*sine\n";
+    std::lock_guard<std::mutex> lock(synthMutex);
+    std::string sfz = buffer.str();
+    std::cout << sfz;
     synth.loadSfzString("", sfz);
 }
 
@@ -163,26 +116,13 @@ void SoundBoardPlugin::run(
     uint32_t midiEventCount      // Number of MIDI events in block
 )
 {
-    //  std::unique_lock<std::mutex> lock(synthMutex, std::try_to_lock);
-    //  if (!lock.owns_lock())
-    //   { // synth is locked?
-    //      std::fill_n(outputs[0], frames, 0.0f);
-    //       std::fill_n(outputs[1], frames, 0.0f);
-    //      return;
-    //   }
-    // const TimePosition &timePos(getTimePosition());
-    // if (timePos.bbt.valid)
-    // {
-    //     synth.tempo(0, 60.0f / timePos.bbt.beatsPerMinute);
-    //     synth.timeSignature(0, timePos.bbt.beatsPerBar, timePos.bbt.beatType);
-    //     const double beat = timePos.bbt.beat - 1;
-    //     const double fracBeat = timePos.bbt.tick / timePos.bbt.ticksPerBeat;
-    //     const double barBeat = beat + fracBeat;
-    //     synth.timePosition(0, timePos.bbt.bar, barBeat);
-    //     //printf("barBeat %f\n", barBeat);
-    //     synth.playbackState(0, static_cast<int>(timePos.playing));
-    // }
-
+    std::unique_lock<std::mutex> lock(synthMutex, std::try_to_lock);
+    if (!lock.owns_lock())
+    { // synth is locked?
+        std::fill_n(outputs[0], frames, 0.0f);
+        std::fill_n(outputs[1], frames, 0.0f);
+        return;
+    }
     uint32_t framesDone = 0;
     uint32_t curEventIndex = 0; // index for midi event to process
 
@@ -195,6 +135,7 @@ void SoundBoardPlugin::run(
             int midi_message = status & 0xF0;
             int midi_data1 = midiEvents[curEventIndex].data[1];
             int midi_data2 = midiEvents[curEventIndex].data[2];
+            printf("message %i data1 %i, data2 %i\n", midi_message, midi_data1, midi_data2);
             switch (midi_message)
             {
             case 0x80: // note_off
@@ -212,6 +153,7 @@ void SoundBoardPlugin::run(
         ++framesDone;
     } // frames loop
     synth.renderBlock(outputs, frames, 2);
+
 } // run
 
 /* Plugin entry point, called by DPF to create a new plugin instance. */
