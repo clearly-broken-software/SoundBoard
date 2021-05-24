@@ -19,15 +19,22 @@
 
 enum Parameters
 {
-    kButton1 = 0,
-    kButton2,
-    kButton3,
-    kButton4,
-    kButton5,
-    kButton6,
-    kButton7,
-    kButton8,
-    kButton9,
+    kPad1 = 0,
+    kPad2,
+    kPad3,
+    kPad4,
+    kPad5,
+    kPad6,
+    kPad7,
+    kPad8,
+    kPad9,
+    kPad10,
+    kPad11,
+    kPad12,
+    kPad13,
+    kPad14,
+    kPad15,
+    kPad16,
     kParameterCount
 };
 

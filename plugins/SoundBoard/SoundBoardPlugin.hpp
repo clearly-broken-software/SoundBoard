@@ -92,8 +92,8 @@ private:
     void makeSFZ();
     sfz::Sfizz synth;
     std::mutex synthMutex;
-    std::string sample_paths[9];
-    std::string keys[9];
+    std::string sample_paths[16];
+    std::string keys[16];
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundBoardPlugin)
 };

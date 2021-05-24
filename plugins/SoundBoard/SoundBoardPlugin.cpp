@@ -18,7 +18,7 @@ void SoundBoardPlugin::initState(uint32_t index, String &stateKey, String &defau
     switch (index)
     {
     case 0:
-        stateKey = "filename";
+        stateKey = "filepath";
         defaultStateValue = "";
         break;
 
@@ -62,35 +62,17 @@ void SoundBoardPlugin::setParameterValue(uint32_t index, float value)
 
 void SoundBoardPlugin::initSFZ()
 {
-    for (int i = 0; i < 9; i++)
+    for (int i = 0; i < 16; i++)
     {
         sample_paths[i] = "*sine";
+        keys[i] = std::to_string(60 + i);
     }
-    sample_paths[0] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample1.wav";
-    sample_paths[1] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample2.wav";
-    sample_paths[2] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample3.wav";
-    sample_paths[3] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample4.wav";
-    sample_paths[4] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample5.wav";
-    sample_paths[5] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample6.wav";
-    sample_paths[6] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample7.wav";
-    sample_paths[7] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample8.wav";
-    sample_paths[8] = "/home/rob/git/ClearlyBroken/SoundBoard/scratchpad/sample9.wav";
-
-    keys[0] = "c4";
-    keys[1] = "d4";
-    keys[2] = "e4";
-    keys[3] = "f4";
-    keys[4] = "g4";
-    keys[5] = "a4";
-    keys[6] = "b4";
-    keys[7] = "c5";
-    keys[8] = "d5";
 }
 
 void SoundBoardPlugin::makeSFZ()
 {
     std::stringstream buffer;
-    for (int i = 0; i < 9; i++)
+    for (int i = 0; i < 16; i++)
     {
         buffer << "<region>\n";
         buffer << "sample=" << sample_paths[i] << "\n";
@@ -98,10 +80,11 @@ void SoundBoardPlugin::makeSFZ()
         buffer << "loop_mode=one_shot\n";
         buffer << "amp_veltrack=0\n";
     }
-    //    std::string sfz = "<region>\nsample=*sine\n";
     std::lock_guard<std::mutex> lock(synthMutex);
     std::string sfz = buffer.str();
+#ifdef DEBUG
     std::cout << sfz;
+#endif
     synth.loadSfzString("", sfz);
 }
 
@@ -135,7 +118,9 @@ void SoundBoardPlugin::run(
             int midi_message = status & 0xF0;
             int midi_data1 = midiEvents[curEventIndex].data[1];
             int midi_data2 = midiEvents[curEventIndex].data[2];
+#ifdef DEBUG
             printf("message %i data1 %i, data2 %i\n", midi_message, midi_data1, midi_data2);
+#endif
             switch (midi_message)
             {
             case 0x80: // note_off

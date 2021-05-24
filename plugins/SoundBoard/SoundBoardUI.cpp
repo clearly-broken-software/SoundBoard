@@ -5,30 +5,36 @@ START_NAMESPACE_DISTRHO
 // -----------------------------------------------------------------------------
 
 SoundBoardUI::SoundBoardUI()
-    : UI(300, 300)
+    : UI(638, 638)
 {
     sampleDir = fs::current_path();
-    for (int i = 0; i < 9; i++)
+    for (int i = 0; i < 16; i++)
     {
-        fButton[i].reset(new Button(this, this));
-        fButton[i]->setId(kButton1 + i);
-        fButton[i]->setLabelColor(Color(0.8f, 0.8f, 0.8f));
-        fButton[i]->setBackgroundColor(Color(0.1f, 0.1f, 0.1f));
-        fButton[i]->setLabel(std::string("Sample " + std::to_string(i + 1)));
-        fButton[i]->setSize(100, 300 / 9);
-        fButton[i]->setAbsolutePos(10, (300 / 9) * i);
-        pad[i].clear();
+        fPad[i].reset(new Pad(this));
+        int id = i;
+        fPad[i]->setId(id);
+        fPad[i]->setCallback(this);
+        fPad[i]->setFont("roboto", reinterpret_cast<const uchar *>(fonts::Roboto_RegularData),
+                         fonts::Roboto_RegularDataSize);
+        fPad[i]->background_color = cbcol::black_olive;
+        fPad[i]->text_color = cbcol::floral_white;
+        fPad[i]->border_color = cbcol::flame;
+        fPad[i]->highlight_color = cbcol::flame_1;
+        fPad[i]->noteName = note_number_to_name(60+i);
+        fPad[i]->setSize(150, 150);
+        pad_paths[i].clear();
+        keys[i] = i + 60;
     }
-
-    keys[0] = 60; // c4 (middle c)
-    keys[1] = 62;
-    keys[2] = 64;
-    keys[3] = 65;
-    keys[4] = 67;
-    keys[5] = 69;
-    keys[6] = 71;
-    keys[7] = 72;
-    keys[8] = 74;
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            int padIndex = i * 4 + j;
+            int x = 10 + j * 156;
+            int y = 10 + i * 156;
+            fPad[padIndex]->setAbsolutePos(x, y);
+        }
+    }
 }
 
 SoundBoardUI::~SoundBoardUI()
@@ -45,7 +51,7 @@ void SoundBoardUI::onNanoDisplay()
     float height = getHeight();
     // background
     beginPath();
-    fillColor(0.1f, 0.2f, 0.3f);
+    fillColor(cbcol::eerie_black);
     rect(0.0f, 0.0f, width, height);
     fill();
     closePath();
@@ -57,11 +63,11 @@ void SoundBoardUI::uiFileBrowserSelected(const char *filename)
     if (filename != nullptr)
     {
         char buffer[1024];
-        sprintf(buffer, "%i,%s", currentButton, filename);
+        sprintf(buffer, "%i,%s", currentPad, filename);
         setState("filepath", buffer);
         sampleDir = fs::path(filename).parent_path();
         std::string sample_name(fs::path(filename).filename());
-        fButton[currentButton]->setLabel(sample_name);
+        fPad[currentPad]->padText = sample_name;
         repaint();
     }
 }
@@ -83,29 +89,35 @@ void SoundBoardUI::stateChanged(const char *key, const char *value)
 #endif
 }
 
-void SoundBoardUI::buttonClicked(Button *button, int value)
+void SoundBoardUI::onPadClicked(Pad *button, int value)
 {
     uint32_t id = button->getId();
     if (value == 1)
     {
-        // todo : check index
+#ifdef DEBUG
         printf("sending note %i\n", keys[id]);
+#endif
         sendNote(0, keys[id], 127);
         return;
     }
     if (value == 3)
     {
-        currentButton = id;
+        currentPad = id;
         DGL::Window::FileBrowserOptions opts;
         opts.title = "Load SFZ";
         opts.startDir = sampleDir.c_str();
         opts.buttons.showPlaces = 2;
         getParentWindow().openFileBrowser(opts);
     }
-
-    const char *whichButton = (value == 1) ? "left" : "right";
-    printf("%s button clicked\n", whichButton);
 }
+
+std::string SoundBoardUI::note_number_to_name(int nn)
+{
+    int index = nn % 12;
+    int octave = nn / 12 - 1;
+    return noteNames[index] + std::to_string(octave);
+}
+
 UI *createUI()
 {
     return new SoundBoardUI();

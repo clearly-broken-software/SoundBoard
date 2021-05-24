@@ -17,7 +17,8 @@ FILES_DSP = \
 
 FILES_UI = \
 	SoundBoardUI.cpp \
-	NanoButton.cpp
+	widgets/src/Pad.cpp \
+	fonts.cpp \
 
 # --------------------------------------------------------------
 # Do some magic
@@ -30,7 +31,8 @@ include ../../sfizz/dpf.mk
 BUILD_C_FLAGS += $(SFIZZ_C_FLAGS)
 BUILD_CXX_FLAGS += $(SFIZZ_CXX_FLAGS)
 LINK_FLAGS += $(SFIZZ_LINK_FLAGS) 
-BASE_FLAGS += -I. -I../../sfizz/external/filesystem/include/ghc
+BASE_FLAGS += -I. -I../../sfizz/external/filesystem/include/ghc \
+				-I./widgets
 
 	
 # --------------------------------------------------------------
