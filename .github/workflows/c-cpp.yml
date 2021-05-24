@@ -1,0 +1,58 @@
+name: C/C++ CI
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "recursive"
+      - name: deps
+        run: sudo apt-get install libgl1-mesa-dev libx11-dev libsamplerate0-dev libsndfile1-dev libjack-jackd2-dev
+      - name: make
+        run: make -j2
+      - name: create-zip
+        run: |
+          cd /home/runner/work/SoundBoard/SoundBoard/bin/
+          zip -r /home/runner/work/SoundBoard_binaries.zip ./* 
+
+#      - uses: actions/upload-artifact@v2
+#        with:
+#          name: drops-binaries
+#          path: /home/runner/work/drops/drops/bin/
+
+#      - name: clean
+#        run: make dist-clean
+
+#      - name: make-debug
+#        run: make -j2 DEBUG=true
+
+#      - uses: actions/upload-artifact@v2
+#        with:
+#         name: drops-binaries-debug
+#          path: /home/runner/work/drops/drops/bin
+
+#      - name: Create Release
+#        id: create_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ github.ref }}
+#          release_name: Release ${{ github.ref }}
+#          draft: false
+#          prerelease: true
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: /home/runner/work/SoundBoard_binaries.zip
+          asset_name: SoundBoard_binaries.zip
+          tag: testing
+          overwrite: true
